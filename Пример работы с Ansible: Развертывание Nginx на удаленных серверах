@@ -1,0 +1,51 @@
+1. Подготовка инвентарного файла
+Создайте файл inventory.ini с перечнем серверов:
+
+[web_servers]
+server1.example.com ansible_user=ubuntu
+server2.example.com ansible_user=ubuntu
+
+[all:vars]
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+
+2. Создание плейбука
+Создайте файл deploy_nginx.yml:
+---
+- name: Install and start Nginx
+  hosts: web_servers
+  become: yes  # Использование sudo
+
+  tasks:
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+3. Запуск плейбука
+Выполните команду:
+
+ansible-playbook -i inventory.ini deploy_nginx.yml
+
+4. Проверка результата
+Ansible выведет отчет о выполнении задач. Для проверки вручную подключитесь к серверу:
+ssh ubuntu@server1.example.com
+systemctl status nginx
+
+Ключевые моменты:
+Инвентарь: Список серверов и параметры подключения.
+
+Плейбук: YAML-файл с последовательностью задач.
+
+Модули: apt (установка пакетов), service (управление службами).
+
+Идемпотентность: Повторный запуск не изменит корректное состояние.
